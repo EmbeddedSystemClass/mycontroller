@@ -1,16 +1,13 @@
 package storage
 
-import mongo "github.com/mycontroller-org/mycontroller/plugin/mongo"
+import (
+	"github.com/mycontroller-org/mycontroller/plugin/storage/mongo"
+)
 
 // Client interface
 type Client interface {
-	Save(data ...interface{}) error
+	Save(entity string, data ...interface{}) error
 	Find(entityName string, results interface{}) error
-}
-
-// Entity returns entity name
-type Entity interface {
-	GetEntityName() string
 }
 
 // StorageClient to the world access
@@ -22,6 +19,6 @@ func Init(config map[string]string) error {
 	if err != nil {
 		return err
 	}
-	StorageClient = &c
+	StorageClient = c
 	return nil
 }

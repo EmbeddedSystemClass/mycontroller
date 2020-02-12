@@ -1,7 +1,10 @@
 package model
 
-import utils "github.com/mycontroller-org/mycontroller/pkg/utils"
-import mc "github.com/mycontroller-org/mycontroller/pkg"
+import (
+	mc "github.com/mycontroller-org/mycontroller/pkg"
+	"github.com/mycontroller-org/mycontroller/pkg/storage"
+	utils "github.com/mycontroller-org/mycontroller/pkg/utils"
+)
 
 // Gateway types
 const (
@@ -53,11 +56,11 @@ func (g *Gateway) Reload() {
 }
 
 // Save gateway config into disk
-func (g *Gateway) Save() {
+func (g *Gateway) Save() error {
 	if g.UUID == "" {
 		g.UUID = utils.NewUUID()
 	}
-	// add code to save
+	return storage.StorageClient.Save(mc.EntGateway, &g)
 }
 
 // SetState Updates state data

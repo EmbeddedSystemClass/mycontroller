@@ -7,8 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	mg "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	s "github.com/mycontroller-org/mycontroller/pkg/storage"
 )
 
 var ctx = context.TODO()
@@ -26,7 +24,7 @@ type Client struct {
 }
 
 // NewClient mongodb
-func NewClient(config map[string]string) (s.Client, error) {
+func NewClient(config map[string]string) (*Client, error) {
 	c := &Client{
 		Config: Config{
 			Database: config["database"],
@@ -42,27 +40,17 @@ func NewClient(config map[string]string) (s.Client, error) {
 	return c, nil
 }
 
-func (c *Client) getCollection(data interface{}) (*mg.Collection, error) {
-	e, ok := data.(s.Entity)
-	if !ok {
-		return nil, errors.New("Provided data does not implemented Entity interface")
-	}
-	return c.getCollectionByName(e.GetEntityName()), nil
-}
-
-func (c *Client) getCollectionByName(name string) *mg.Collection {
-	return c.Client.Database(c.Config.Database).Collection(name)
+func (c *Client) getCollection(entity string) *mg.Collection {
+	return c.Client.Database(c.Config.Database).Collection(entity)
 }
 
 // Save date into database
-func (c *Client) Save(data ...interface{}) error {
+func (c *Client) Save(entity string, data ...interface{}) error {
 	if len(data) == 0 {
 		return errors.New("No data provided")
 	}
-	cl, err := c.getCollection(&data[0])
-	if err != nil {
-		return err
-	}
+	cl := c.getCollection(entity)
+	var err error
 	if len(data) == 1 {
 		_, err = cl.InsertOne(ctx, data[0])
 	} else {
@@ -76,8 +64,8 @@ func (c *Client) Save(data ...interface{}) error {
 }
 
 // Find returns data
-func (c *Client) Find(entityName string, results interface{}) error {
-	cl := c.getCollectionByName(entityName)
+func (c *Client) Find(entity string, results interface{}) error {
+	cl := c.getCollection(entity)
 	cur, err := cl.Find(ctx, bson.M{})
 	if err != nil {
 		return err
