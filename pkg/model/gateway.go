@@ -60,7 +60,7 @@ func (g *Gateway) Save() error {
 	if g.UUID == "" {
 		g.UUID = utils.NewUUID()
 	}
-	return storage.StorageClient.Save(mc.EntGateway, &g)
+	return storage.StorageClient.Save(mc.EntGateway, g)
 }
 
 // SetState Updates state data
@@ -72,4 +72,9 @@ func (g *Gateway) SetState(s State) {
 // GetEntityName returns the name of this entity
 func (g *Gateway) GetEntityName() string {
 	return mc.EntGateway
+}
+
+// GetUUID returns UUID of this object
+func (g *Gateway) GetUUID() string {
+	return g.UUID
 }

@@ -1,13 +1,15 @@
 package storage
 
 import (
+	"github.com/mycontroller-org/mycontroller/pkg/interfaces"
 	"github.com/mycontroller-org/mycontroller/plugin/storage/mongo"
 )
 
 // Client interface
 type Client interface {
-	Save(entity string, data ...interface{}) error
-	Find(entityName string, results interface{}) error
+	Save(entity string, data interfaces.Entity) error
+	Find(entityName string, filter map[string]string, results interface{}) error
+	FindOne(entityName string, filter map[string]string, result interface{}) error
 }
 
 // StorageClient to the world access
