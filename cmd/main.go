@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"io/ioutil"
 
@@ -33,12 +32,12 @@ func init() {
 	cf := flag.String("config", "./config.yaml", "Configuration file")
 	flag.Parse()
 	if cf == nil {
-		panic(errors.New("Configuration file not supplied"))
+		zap.L().Fatal("Configuration file not supplied")
 	}
 	zap.L().Debug("Configuration file path:", zap.String("file", *cf))
 	d, err := ioutil.ReadFile(*cf)
 	if err != nil {
-		panic(err)
+		zap.L().Fatal("Error on reading configuration file", zap.Error(err))
 	}
 
 	yaml.Unmarshal(d, &config)
@@ -48,11 +47,14 @@ func init() {
 	}
 	err = storage.Init(db)
 	if err != nil {
-		panic(err)
+		zap.L().Fatal("Error on storage init", zap.Error(err))
 	}
 }
 
 func main() {
 	defer zap.L().Sync()
-	handler.StartHandler(&config.Web)
+	err := handler.StartHandler(&config.Web)
+	if err != nil {
+		zap.L().Fatal("Error on starting http handler", zap.Error(err))
+	}
 }
