@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,59 +15,13 @@ func registerGatewayRoutes(router *mux.Router) {
 }
 
 func listGateways(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	results := make([]model.Gateway, 0)
-	err := storage().Find(mc.EntGateway, nil, &results)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	od, err := json.Marshal(&results)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	w.Write(od)
+	findMany(w, r, mc.EntGateway, &[]model.Gateway{})
 }
 
 func getGateway(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	p := params(r)
-
-	var result model.Gateway
-	err := storage().FindOne(mc.EntGateway, p, &result)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	od, err := json.Marshal(&result)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	w.Write(od)
+	findOne(w, r, mc.EntGateway, &model.Gateway{})
 }
 
 func updateGateway(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	d, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	var g model.Gateway
-	err = json.Unmarshal(d, &g)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	err = g.Save()
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
+	saveEntity(w, r, &model.Gateway{})
 }

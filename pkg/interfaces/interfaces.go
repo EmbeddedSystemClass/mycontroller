@@ -4,4 +4,5 @@ package interfaces
 type Entity interface {
 	GetEntityName() string
 	GetUUID() string
+	Save() error
 }

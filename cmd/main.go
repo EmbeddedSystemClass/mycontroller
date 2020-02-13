@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
+
+	"go.uber.org/zap"
 
 	"github.com/mycontroller-org/mycontroller/cmd/app/handler"
 	"github.com/mycontroller-org/mycontroller/pkg/storage"
@@ -21,13 +22,20 @@ type Config struct {
 var config Config
 
 func init() {
-	fmt.Println("Welcome to MyController 2.x :)")
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+	zap.ReplaceGlobals(logger)
+
+	zap.L().Info("Welcome to MyController 2.x :)")
+
 	cf := flag.String("config", "./config.yaml", "Configuration file")
 	flag.Parse()
 	if cf == nil {
 		panic(errors.New("Configuration file not supplied"))
 	}
-	fmt.Println("File Name:", *cf)
+	zap.L().Debug("Configuration file path:", zap.String("file", *cf))
 	d, err := ioutil.ReadFile(*cf)
 	if err != nil {
 		panic(err)
@@ -45,5 +53,6 @@ func init() {
 }
 
 func main() {
+	defer zap.L().Sync()
 	handler.StartHandler(&config.Web)
 }

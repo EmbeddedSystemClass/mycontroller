@@ -1,25 +1,12 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	st "github.com/mycontroller-org/mycontroller/pkg/storage"
 	"github.com/rs/cors"
+	"go.uber.org/zap"
 )
-
-func storage() st.Client {
-	return st.StorageClient
-}
-
-// WebConfig input
-type WebConfig struct {
-	BindAddress  string `yaml:"bindAddress"`
-	Port         uint   `yaml:"port"`
-	WebDirectory string `yaml:"webDirectory"`
-}
 
 // StartHandler for http access
 func StartHandler(config *WebConfig) error {
@@ -44,10 +31,6 @@ func StartHandler(config *WebConfig) error {
 	handler := c.Handler(router)
 	//handler := cors.Default().Handler(router)
 
-	fmt.Println("Listening...")
+	zap.L().Info("Http server is listening on the port 8080")
 	return http.ListenAndServe(":8080", handler)
-}
-
-func params(r *http.Request) map[string]string {
-	return mux.Vars(r)
 }
