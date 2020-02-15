@@ -4,6 +4,18 @@ web:
   webDirectory: 
 
 database:
-  type: "mongodb"
-  name: "mydb"
-  uri: "test"
+  storage: mongodb
+  metrics: influxdb
+
+databases:
+  - name: mongodb
+    database: mydb
+    uri: "mongodb+srv://<username>:<password>@<hostname>/?retryWrites=true&w=majority"
+  
+  - name: influxdb
+    database: mydb
+    uri: http://localhost:9999
+
+logger:
+  level: DEBUG
+  console: true

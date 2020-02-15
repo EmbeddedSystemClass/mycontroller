@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	m2s "github.com/mitchellh/mapstructure"
 	"github.com/mycontroller-org/mycontroller/pkg/interfaces"
 	"go.mongodb.org/mongo-driver/bson"
 	mg "go.mongodb.org/mongo-driver/mongo"
@@ -14,6 +15,7 @@ var ctx = context.TODO()
 
 // Config of the database
 type Config struct {
+	Name     string
 	Database string
 	URI      string
 }
@@ -26,19 +28,31 @@ type Client struct {
 
 // NewClient mongodb
 func NewClient(config map[string]string) (*Client, error) {
-	c := &Client{
-		Config: Config{
-			Database: config["database"],
-			URI:      config["uri"],
-		},
-	}
-	clientOptions := options.Client().ApplyURI(c.Config.URI)
-	cl, err := mg.Connect(ctx, clientOptions)
+	var cfg Config
+	err := m2s.Decode(config, &cfg)
 	if err != nil {
 		return nil, err
 	}
-	c.Client = cl
+	clientOptions := options.Client().ApplyURI(cfg.URI)
+	mc, err := mg.Connect(ctx, clientOptions)
+	if err != nil {
+		return nil, err
+	}
+	c := &Client{
+		Config: cfg,
+		Client: mc,
+	}
 	return c, nil
+}
+
+// Close the connection
+func (c *Client) Close() error {
+	return c.Client.Disconnect(ctx)
+}
+
+// Ping to the target database
+func (c *Client) Ping() error {
+	return c.Client.Ping(ctx, nil)
 }
 
 func (c *Client) getCollection(entity string) *mg.Collection {
